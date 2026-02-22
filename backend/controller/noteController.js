@@ -1,50 +1,75 @@
+const { title } = require("process");
 const Note = require("../models/Note");
+const asyncHandler = require("../middleware/asyncHandler");
 
-exports.createNote = async (req,res,next)=>{
-    try{
-        const note = await Note.create(req.body);
-        res.status(201).json(note);
-    }catch(error){
-      next(error);
+exports.createNote = asyncHandler(async (req, res) => {
+  const { title, content } = req.body;
+
+  if (!title || !content) {
+    res.status(400);
+    throw new Error("Title and content are required");
+  }
+
+  const note = await Note.create({
+    title,
+    content,
+    user: req.user._id
+  });
+
+  res.status(201).json(note);
+});
+
+
+exports.getNotes = asyncHandler(async (req, res) => {
+  const notes = await Note.find({ user: req.user._id }).sort({ createdAt: -1 });
+
+  res.json(notes);
+});
+
+
+exports.updateNote = asyncHandler(async (req, res) => {
+  const note = await Note.findById(req.params.id);
+
+  if (!note) {
+    res.status(404);
+    throw new Error("Note not found");
+  }
+
+  if (note.user.toString() !== req.user._id.toString()) {
+    res.status(401);
+    throw new Error("Not authorized to update this note");
+  }
+
+  if (req.body.title !== undefined) {
+    note.title = req.body.title;
+  }
+
+  if (req.body.content !== undefined) {
+    note.content = req.body.content;
+  }
+
+  const updatedNote = await note.save();
+
+  res.json(updatedNote);
+});
+
+
+exports.deleteNote =asyncHandler( async (req, res) => {
+   
+    const note = await Note.findById(req.params.id);
+
+    if (!note) {
+      res.status(404);
+      throw new Error("Note not found");
     }
-};
 
-exports.getNotes = async (req, res) => {
-  try {
-    const notes = await Note.find().sort({ createdAt: -1 });
-    res.json(notes);
-  } 
-  catch (error) {
-    next(error);
-  }
-};
-
-exports.updateNote = async(req,res)=>{
-  try{
-    const updateNote=await Note.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new:true,
-        runValidators:true
-      }
-    );
-    if(!updateNote){
-      return res.status(404).json({message:"Note not found"});
+    if (note.user.toString() !== req.user._id.toString()) {
+       res.status(401);
+       throw new Error( "Not authorized");
     }
-    res.json(updateNote);
-  }
-  catch(error){
-    next(error);
-  }
-};
 
-exports.deleteNote = async (req, res) => {
-  try {
-    await Note.findByIdAndDelete(req.params.id);
-    res.json({ message: "Note deleted" });
-  } 
-  catch (error) {
-   next(error);
-  }
-};
+    await note.deleteOne();
+
+    res.json({ message: "Note deleted successfully" });
+  
+});
