@@ -10,15 +10,7 @@ function Dashboard() {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
     useEffect(() => {
-        if (!userInfo) {
-            window.location.href = "/login";
-
-        } else {
-            fetchNotes();
-        }
-    }, []);
-
-    const fetchNotes = async () => {
+        const fetchNotes = async () => {
         try {
             const config = {
                 headers: {
@@ -37,8 +29,15 @@ function Dashboard() {
             alert("failed to fetch notes");
         }
     };
+        if (!userInfo) {
+            window.location.href = "/login";
 
-    const createNoteHandler = async (e) => {
+        } else {
+            fetchNotes();
+        }
+    }, [userInfo]);
+
+      const createNoteHandler = async (e) => {
         e.preventDefault();
 
         try {
