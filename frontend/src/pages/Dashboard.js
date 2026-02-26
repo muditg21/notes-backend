@@ -7,18 +7,18 @@ function Dashboard() {
     const [content, setContent] = useState("");
     const [editingId, setEditingId] = useState(null);
 
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+   
 
-    useEffect(() => {
+useEffect(() => {
+  const storedUser = JSON.parse(localStorage.getItem("userInfo"));
+
+  if (!storedUser) {
+    window.location.href = "/login";
+    return;
+  }
+
   const fetchNotes = async () => {
     try {
-      const storedUser = JSON.parse(localStorage.getItem("userInfo"));
-
-      if (!storedUser) {
-        window.location.href = "/login";
-        return;
-      }
-
       const config = {
         headers: {
           Authorization: `Bearer ${storedUser.token}`,
