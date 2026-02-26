@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios"
 
 function Login() {
-    const [email, SetEmail] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     const submitHandler = async (e) => {
@@ -26,35 +26,33 @@ function Login() {
         }
     };
 
-    return (
-        <div>
-            <h2>Login</h2>
+   return (
+  <div className="container">
+    <h2>Login</h2>
 
-            <form onSubmit={submitHandler}>
-                <div>
-                    <label>Email</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => SetEmail(e.target.value)}
-                        required
-                    />
-                </div>
+    <form onSubmit={submitHandler}>
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
 
-                <div>
-                    <label>Password</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
 
-                <button type="submit">Login</button>
-            </form>
-        </div>
-    );
+      <button type="submit" className="primary-btn">
+        Login
+      </button>
+    </form>
+  </div>
+);
 }
 
 export default Login;
