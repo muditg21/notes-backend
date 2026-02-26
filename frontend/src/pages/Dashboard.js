@@ -2,23 +2,22 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 function Dashboard() {
-    const [notes, setNotes] = useState([]);
-    const [title, setTitle] = useState("");
-    const [content, setContent] = useState("");
-    const [editingId, setEditingId] = useState(null);
+  const [notes, setNotes] = useState([]);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [editingId, setEditingId] = useState(null);
 
-   
-
-useEffect(() => {
-  const storedUser = JSON.parse(localStorage.getItem("userInfo"));
-
-  if (!storedUser) {
-    window.location.href = "/login";
-    return;
-  }
+  const API_URL = "https://copy-pen.onrender.com";
 
   const fetchNotes = async () => {
     try {
+      const storedUser = JSON.parse(localStorage.getItem("userInfo"));
+
+      if (!storedUser) {
+        window.location.href = "/login";
+        return;
+      }
+
       const config = {
         headers: {
           Authorization: `Bearer ${storedUser.token}`,
@@ -26,7 +25,7 @@ useEffect(() => {
       };
 
       const { data } = await axios.get(
-        "https://copy-pen.onrender.com/api/notes",
+        `${API_URL}/api/notes`,
         config
       );
 
@@ -37,139 +36,144 @@ useEffect(() => {
     }
   };
 
-  fetchNotes();
-}, []);
+  useEffect(() => {
+    fetchNotes();
+  }, []);
 
-      const createNoteHandler = async (e) => {
-        e.preventDefault();
+  const createNoteHandler = async (e) => {
+    e.preventDefault();
 
-        try {
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${userInfo.token}`,
-                },
-            };
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("userInfo"));
 
-            //update a note
+      const config = {
+        headers: {
+          Authorization: `Bearer ${storedUser.token}`,
+        },
+      };
 
-            if (editingId !==null) {
-                await axios.put(
-                    `https://copy-pen.onrender.com/api/notes/${editingId}`,
-                    { title, content },
-                    config
-                );
-               
-            }
-            //create A new post
-            else {
-                await axios.post(
-                    "https://copy-pen.onrender.com/api/notes",
-                    { title, content }, config
-                );
-            }
-            setEditingId(null);
-            setTitle("");
-            setContent("");
-            fetchNotes();
+      if (editingId !== null) {
+        await axios.put(
+          `${API_URL}/api/notes/${editingId}`,
+          { title, content },
+          config
+        );
+      } else {
+        await axios.post(
+          `${API_URL}/api/notes`,
+          { title, content },
+          config
+        );
+      }
 
-        } catch (error) {
-            alert("failed to create note");
-        }
-    };
-
-    const deleteNoteHandler = async (id) => {
-        try {
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${userInfo.token}`,
-                },
-            };
-
-            await axios.delete(
-                `https://copy-pen.onrender.com/api/notes/${id}`, config
-            );
-
-            fetchNotes();
-        } catch (error) {
-            alert("failed to delete Note");
-        }
+      setEditingId(null);
+      setTitle("");
+      setContent("");
+      fetchNotes();
+    } catch (error) {
+      alert("Operation failed");
     }
+  };
 
-    const logoutHandler = () => {
-        localStorage.removeItem("userInfo");
-        window.location.href = "/login";
-    };
-    return (
-        <div className="container">
-            <h2>Dashboard</h2>
+  const deleteNoteHandler = async (id) => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("userInfo"));
 
-            <button className="logout-btn" onClick={logoutHandler}>
-                Logout
-            </button>
+      const config = {
+        headers: {
+          Authorization: `Bearer ${storedUser.token}`,
+        },
+      };
 
-            <hr />
+      await axios.delete(
+        `${API_URL}/api/notes/${id}`,
+        config
+      );
 
-            <form onSubmit={createNoteHandler}>
-                <input
-                    placeholder="Title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                />
+      fetchNotes();
+    } catch (error) {
+      alert("Failed to delete note");
+    }
+  };
 
-                <textarea
-                    placeholder="Content"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    required
-                />
+  const logoutHandler = () => {
+    localStorage.removeItem("userInfo");
+    window.location.href = "/login";
+  };
 
-                <button type="submit" className="primary-btn">
-                    {editingId!==null ? "Update Note" : "Create Note"}
-                </button>
-                {editingId !== null && (
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setEditingId(null);
-                            setTitle("");
-                            setContent("");
-                        }}
-                    >
-                        Cancel
-                    </button>
-                )}
-            </form>
+  return (
+    <div className="container">
+      <h2>Dashboard</h2>
 
-            <hr />
+      <button className="logout-btn" onClick={logoutHandler}>
+        Logout
+      </button>
 
-            {notes.length === 0 && <p>No notes yet.</p>}
+      <hr />
 
-            {notes.map((note) => (
-                <div key={note._id} className="note-card">
-                    <h3>{note.title}</h3>
-                    <p>{note.content}</p>
-                    <button
-                        className="delete-btn"
-                        onClick={() => deleteNoteHandler(note._id)}
-                    >
-                        Delete
-                    </button>
-                    <button
-                        className="primary-btn"
-                        onClick={() => {
-                            setTitle(note.title);
-                            setContent(note.content);
-                            setEditingId(note._id);
-                        }}
-                    >
-                        Edit
-                    </button>
-                </div>
-            ))}
+      <form onSubmit={createNoteHandler}>
+        <input
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+
+        <textarea
+          placeholder="Content"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          required
+        />
+
+        <button type="submit" className="primary-btn">
+          {editingId !== null ? "Update Note" : "Create Note"}
+        </button>
+
+        {editingId !== null && (
+          <button
+            type="button"
+            onClick={() => {
+              setEditingId(null);
+              setTitle("");
+              setContent("");
+            }}
+          >
+            Cancel
+          </button>
+        )}
+      </form>
+
+      <hr />
+
+      {notes.length === 0 && <p>No notes yet.</p>}
+
+      {notes.map((note) => (
+        <div key={note._id} className="note-card">
+          <h3>{note.title}</h3>
+          <p>{note.content}</p>
+
+          <button
+            className="primary-btn"
+            onClick={() => {
+              setTitle(note.title);
+              setContent(note.content);
+              setEditingId(note._id);
+            }}
+          >
+            Edit
+          </button>
+
+          <button
+            className="delete-btn"
+            onClick={() => deleteNoteHandler(note._id)}
+          >
+            Delete
+          </button>
         </div>
-    );
-};
-
+      ))}
+    </div>
+  );
+}
 
 export default Dashboard;
