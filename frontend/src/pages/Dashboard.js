@@ -10,32 +10,35 @@ function Dashboard() {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
     useEffect(() => {
-        const fetchNotes = async () => {
-        try {
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${userInfo.token}`,
-                },
-            };
+  const fetchNotes = async () => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("userInfo"));
 
-            const { data } = await axios.get(
-                "https://copy-pen.onrender.com/api/notes", config
-            );
+      if (!storedUser) {
+        window.location.href = "/login";
+        return;
+      }
 
-            setNotes(data);
-        }
-        catch (error) {
-            console.log(error);
-            alert("failed to fetch notes");
-        }
-    };
-        if (!userInfo) {
-            window.location.href = "/login";
+      const config = {
+        headers: {
+          Authorization: `Bearer ${storedUser.token}`,
+        },
+      };
 
-        } else {
-            fetchNotes();
-        }
-    }, [userInfo]);
+      const { data } = await axios.get(
+        "https://copy-pen.onrender.com/api/notes",
+        config
+      );
+
+      setNotes(data);
+    } catch (error) {
+      console.log(error);
+      alert("Failed to fetch notes");
+    }
+  };
+
+  fetchNotes();
+}, []);
 
       const createNoteHandler = async (e) => {
         e.preventDefault();
