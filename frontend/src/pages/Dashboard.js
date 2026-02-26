@@ -27,7 +27,7 @@ function Dashboard() {
             };
 
             const { data } = await axios.get(
-                "http://localhost:5000/api/notes", config
+                "https://copy-pen.onrender.com/api/notes", config
             );
 
             setNotes(data);
@@ -52,7 +52,7 @@ function Dashboard() {
 
             if (editingId !==null) {
                 await axios.put(
-                    `http://localhost:5000/api/notes/${editingId}`,
+                    `https://copy-pen.onrender.com/api/notes/${editingId}`,
                     { title, content },
                     config
                 );
@@ -61,7 +61,7 @@ function Dashboard() {
             //create A new post
             else {
                 await axios.post(
-                    "http://localhost:5000/api/notes",
+                    "https://copy-pen.onrender.com/api/notes",
                     { title, content }, config
                 );
             }
@@ -84,7 +84,7 @@ function Dashboard() {
             };
 
             await axios.delete(
-                `http://localhost:5000/api/notes/${id}`, config
+                `https://copy-pen.onrender.com/api/notes/${id}`, config
             );
 
             fetchNotes();
